@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отправка текста в Telegram</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            resize: vertical;
+        }
+        button {
+            background-color: #0088cc;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #006699;
+        }
+        #status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Отправка текста</h1>
+        
+        <form id="textForm">
+            <textarea id="userText" placeholder="Введите ваш текст здесь..."></textarea>
+            <button type="submit" id="submitBtn">Отправить</button>
+        </form>
+        
+        <div id="status" style="display: none;"></div>
+    </div>
+
+    <script>
+        document.getElementById('textForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const userText = document.getElementById('userText').value;
+            const statusDiv = document.getElementById('status');
+            
+            if (userText.trim() === '') {
+                statusDiv.className = 'error';
+                statusDiv.textContent = 'Пожалуйста, введите текст';
+                statusDiv.style.display = 'block';
+                return;
+            }
+            
+            // Telegram bot API токен и chat ID
+            const botToken = '7159108381:AAFvq7-SRZY6DhPM0CjOizQh9XP9pTdPtLM';
+            const chatId = '-1002343985057';
+            
+            // URL для Telegram Bot API
+            const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+            
+            const params = {
+                chat_id: chatId,
+                text: userText
+            };
+            
+            // Сохраняем локально и отправляем в Telegram
+            console.log('Текст для отправки:', userText);
+            localStorage.setItem('savedText', userText);
+            
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(params)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.ok) {
+                    statusDiv.className = 'success';
+                    statusDiv.textContent = 'Сообщение успешно отправлено!';
+                    document.getElementById('userText').value = '';
+                } else {
+                    statusDiv.className = 'error';
+                    statusDiv.textContent = 'Ошибка: ' + data.description;
+                }
+                statusDiv.style.display = 'block';
+            })
+            .catch(error => {
+                statusDiv.className = 'error';
+                statusDiv.textContent = 'Ошибка при отправке: ' + error;
+                statusDiv.style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>
